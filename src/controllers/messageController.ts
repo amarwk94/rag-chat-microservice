@@ -1,16 +1,20 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import ChatMessage from "../models/ChatMessage";
 import ChatSession from "../models/ChatSession";
 import { logger } from "../utils/logger";
+import { NotFoundError } from "../utils/errors/NotFoundError";
 
-export const addMessage = async (req: Request, res: Response) => {
+export const addMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { id } = req.params;
     const { sender, content, context } = req.body;
 
     const sessionExists = await ChatSession.exists({ _id: id });
-    if (!sessionExists)
-      return res.status(404).json({ error: "Session not found" });
+    if (!sessionExists) throw new NotFoundError("Session not found");
 
     const message = await ChatMessage.create({
       sessionId: id,
@@ -24,11 +28,15 @@ export const addMessage = async (req: Request, res: Response) => {
     res.status(201).json(message);
   } catch (err) {
     logger.error("Error adding message:", err);
-    res.status(500).json({ error: "Failed to add message" });
+    next(err);
   }
 };
 
-export const getMessages = async (req: Request, res: Response) => {
+export const getMessages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { id } = req.params;
     const page = parseInt(req.query.page as string) || 1; // default page 1
@@ -39,6 +47,10 @@ export const getMessages = async (req: Request, res: Response) => {
       .sort({ createdAt: 1 })
       .skip(skip)
       .limit(limit);
+
+    if (messages.length === 0) {
+      throw new NotFoundError("No messages found");
+    }
 
     const totalMessages = await ChatMessage.countDocuments({ sessionId: id });
     const totalPages = Math.ceil(totalMessages / limit);
@@ -56,6 +68,6 @@ export const getMessages = async (req: Request, res: Response) => {
     });
   } catch (err) {
     logger.error("Error getting messages:", err);
-    res.status(500).json({ error: "Failed to get messages" });
+    next(err);
   }
 };
