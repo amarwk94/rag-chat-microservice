@@ -8,6 +8,7 @@ import { apiRateLimiter } from "./middleware/rateLimiter";
 import { errorHandler } from "./middleware/errorHandler";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
+import { requestLogger } from "./middleware/logger";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use(
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(apiRateLimiter);
+app.use(requestLogger);
 app.use(apiKeyAuth);
 app.use("/api", sessionRoutes);
 app.use(errorHandler);
