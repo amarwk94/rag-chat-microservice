@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import ChatSession from "../models/ChatSession";
-import ChatMessage from "../models/ChatMessage";
+import * as sessionService from "../services/sessionService";
 import { logger } from "../utils/logger";
-import { NotFoundError } from "../utils/errors/NotFoundError";
-import { BadRequestError } from "../utils/errors/BadRequestError";
+import { NotFoundError } from "../errors/NotFoundError";
+import { BadRequestError } from "../errors/BadRequestError";
 
 export const createSession = async (
   req: Request,
@@ -12,7 +11,7 @@ export const createSession = async (
 ) => {
   try {
     const { userId, title } = req.body;
-    const session = await ChatSession.create({ userId, title });
+    const session = await sessionService.createSession(userId, title);
     res.status(201).json(session);
   } catch (err) {
     logger.error("Error creating session:", err);
@@ -28,17 +27,7 @@ export const renameSession = async (
   try {
     const { id } = req.params;
     const { title } = req.body;
-
-    if (!title) {
-      throw new BadRequestError("Title is required");
-    }
-
-    const session = await ChatSession.findByIdAndUpdate(
-      id,
-      { title },
-      { new: true }
-    );
-    if (!session) throw new NotFoundError("Chat session not found");
+    const session = await sessionService.renameSession(id, title);
     res.json(session);
   } catch (err) {
     logger.error("Error renaming session:", err);
@@ -53,11 +42,7 @@ export const toggleFavorite = async (
 ) => {
   try {
     const { id } = req.params;
-    const session = await ChatSession.findById(id);
-    if (!session) throw new NotFoundError("Chat session not found");
-
-    session.isFavorite = !session.isFavorite;
-    await session.save();
+    const session = await sessionService.toggleFavorite(id);
     res.json(session);
   } catch (err) {
     logger.error("Error toggling favorite status:", err);
@@ -72,9 +57,8 @@ export const deleteSession = async (
 ) => {
   try {
     const { id } = req.params;
-    await ChatMessage.deleteMany({ sessionId: id });
-    await ChatSession.findByIdAndDelete(id);
-    res.json({ message: "Session and messages deleted" });
+    const result = await sessionService.deleteSession(id);
+    res.json(result);
   } catch (err) {
     logger.error("Error deleting session:", err);
     next(err);
