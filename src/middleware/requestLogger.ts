@@ -16,15 +16,13 @@ export const requestLogger = (
     const diff = process.hrtime(start);
     const responseTimeMs = (diff[0] * 1e3 + diff[1] / 1e6).toFixed(2);
 
-    const log = {
+    logger.info("Request completed", {
       traceId,
       method: req.method,
       url: req.originalUrl,
       status: res.statusCode,
-      responseTimeMs,
-    };
-
-    logger.info(JSON.stringify(log));
+      responseTimeMs: Number(responseTimeMs),
+    });
   });
 
   next();
