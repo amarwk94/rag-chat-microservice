@@ -1,6 +1,7 @@
 import ChatMessage from "../models/ChatMessage";
 import ChatSession from "../models/ChatSession";
 import { NotFoundError } from "../errors/NotFoundError";
+import { ERROR_MESSAGES, PAGINATION } from "../constants";
 
 export const addMessageToSession = async (
   sessionId: string,
@@ -9,7 +10,7 @@ export const addMessageToSession = async (
   context?: any
 ) => {
   const sessionExists = await ChatSession.exists({ _id: sessionId });
-  if (!sessionExists) throw new NotFoundError("Session not found");
+  if (!sessionExists) throw new NotFoundError(ERROR_MESSAGES.SESSION_NOT_FOUND);
 
   const message = await ChatMessage.create({
     sessionId,
@@ -22,8 +23,8 @@ export const addMessageToSession = async (
 
 export const getSessionMessages = async (
   sessionId: string,
-  page: number = 1,
-  limit: number = 10
+  page: number = PAGINATION.DEFAULT_PAGE,
+  limit: number = PAGINATION.DEFAULT_LIMIT
 ) => {
   const skip = (page - 1) * limit;
   const messages = await ChatMessage.find({ sessionId })
@@ -32,7 +33,7 @@ export const getSessionMessages = async (
     .limit(limit);
 
   if (messages.length === 0) {
-    throw new NotFoundError("No messages found");
+    throw new NotFoundError(ERROR_MESSAGES.NO_MESSAGES_FOUND);
   }
 
   const totalMessages = await ChatMessage.countDocuments({ sessionId });
