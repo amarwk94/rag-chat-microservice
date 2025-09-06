@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as messageService from "../services/messageService";
 import { logger } from "../utils/logger";
-import { NotFoundError } from "../errors/NotFoundError";
 
 export const addMessage = async (
   req: Request,

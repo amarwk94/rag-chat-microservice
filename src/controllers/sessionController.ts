@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as sessionService from "../services/sessionService";
 import { logger } from "../utils/logger";
-import { NotFoundError } from "../errors/NotFoundError";
-import { BadRequestError } from "../errors/BadRequestError";
 
 export const createSession = async (
   req: Request,

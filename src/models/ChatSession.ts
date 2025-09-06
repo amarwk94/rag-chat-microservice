@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IChatSession extends Document {
   userId: string;
@@ -8,10 +8,12 @@ export interface IChatSession extends Document {
 }
 
 const ChatSessionSchema = new Schema<IChatSession>({
-  userId: { type: String, required: true },
-  title: { type: String, default: 'Untitled Session' },
+  userId: { type: String, required: true, unique: true },
+  title: { type: String, default: "Untitled Session" },
   isFavorite: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IChatSession>('ChatSession', ChatSessionSchema);
+ChatSessionSchema.index({ userId: 1 });
+
+export default mongoose.model<IChatSession>("ChatSession", ChatSessionSchema);
