@@ -3,13 +3,18 @@ filebeat.inputs:
     enabled: true
     paths:
       - /usr/share/filebeat/logs/*.log
-    json:
-      keys_under_root: true
-      add_error_key: true
-      message_key: message
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.overwrite_keys: true
 
+# Avoid setting a custom index directly in output — let Filebeat use the template
+# Otherwise, you have to manually create mappings every time.
 output.elasticsearch:
   hosts: ["http://elasticsearch:9200"]
+  index: "filebeat-custom-%{+yyyy.MM.dd}"
+
+setup.template.enabled: false # disable auto-template if you're using a manual one
+setup.ilm.enabled: false # avoid ILM conflicts with manual indexing
 
 setup.kibana:
   host: "http://kibana:5601"

@@ -60,11 +60,9 @@ services:
     user: root
     volumes:
       - ./logs:/usr/share/filebeat/logs
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
     depends_on:
       - elasticsearch
-    command: >
-      bash -c "chmod go-w /usr/share/filebeat/filebeat.yml && filebeat -e -c /usr/share/filebeat/filebeat.yml"
 
 volumes:
   mongo-data:
